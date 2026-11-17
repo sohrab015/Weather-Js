@@ -1,4 +1,4 @@
-const apiKey = "YOUR_API_KEY";
+const apiKey = "XEA7VRUDHXNXJPVFTE5SLQELJ";
 let unit = "metric";
 let place = "";
 
@@ -136,7 +136,7 @@ function searchPlace() {
 
 function useMyLocation(showFailMessage) {
   if (!navigator.geolocation) {
-    if (showFailMessage) showError("Your browser does not support location.");
+    if (showFailMessage) showError("Your browser does not support location. Type a city instead.");
     return;
   }
   navigator.geolocation.getCurrentPosition(
@@ -144,9 +144,17 @@ function useMyLocation(showFailMessage) {
       place = position.coords.latitude + "," + position.coords.longitude;
       getWeather();
     },
-    () => {
-      if (showFailMessage) showError("Could not get your location.");
-    }
+    (error) => {
+      if (!showFailMessage) return;
+      if (error.code === 1) {
+        showError("Location is blocked. Click the lock icon near the address bar, allow Location, then reload.");
+      } else if (error.code === 2) {
+        showError("Your device could not find its location. Turn on location services, or type a city instead.");
+      } else {
+        showError("Location took too long. Try again, or type a city instead.");
+      }
+    },
+    { timeout: 10000 }
   );
 }
 
