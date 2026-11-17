@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="min-h-screen bg-base-200" style="font-family: 'Poppins', sans-serif;">
+
+  <header class="navbar bg-base-100 shadow-sm px-4 md:px-10">
+    <div class="flex-1">
+      <span class="text-xl font-semibold">🌤️ WeatherNow</span>
+    </div>
+    <div class="flex-none">
+      <label class="swap swap-rotate btn btn-ghost btn-circle">
+        <input id="theme-toggle" type="checkbox" />
+        <span class="swap-off text-xl">🌙</span>
+        <span class="swap-on text-xl">☀️</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+
+    <section class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h1 class="card-title text-2xl">Check the weather</h1>
+        <p class="opacity-70">Enter a city or location to see the current weather and the 24-hour outlook.</p>
+
+        <div class="flex flex-col sm:flex-row gap-3 mt-2">
+          <input id="location-input" type="text" class="input input-bordered flex-1"
+            placeholder="e.g. Chattogram, Dhaka, London" autocomplete="off" />
+          <button id="search-btn" class="btn btn-primary">Search</button>
+          <button id="location-btn" class="btn btn-outline">📍 My location</button>
+        </div>
+
+        <div id="error-box" role="alert" class="alert alert-error mt-3 hidden">
+          <span id="error-text">Something went wrong.</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="loading" class="hidden">
+      <div class="flex flex-col items-center gap-3 py-12">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="opacity-70">Fetching weather data...</p>
+      </div>
+    </section>
+
+    <section id="empty-state" class="text-center py-12">
+      <div class="text-6xl mb-3">🔎</div>
+      <p class="opacity-70">Search for a location to get started.</p>
+    </section>
+
+    <div id="weather-content" class="hidden space-y-8">
+
+      <section class="card bg-primary text-primary-content shadow-lg">
+        <div class="card-body">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h2 id="location-name" class="text-2xl font-semibold">-</h2>
+              <p id="current-date" class="opacity-80 text-sm">-</p>
+              <div class="flex items-center gap-4 mt-4">
+                <span id="current-icon" class="text-6xl">☀️</span>
+                <div>
+                  <p id="current-temp" class="text-5xl font-bold">--°</p>
+                  <p id="current-conditions" class="opacity-90">-</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-start md:items-end gap-3">
+              <div class="join">
+                <button id="unit-c" class="btn btn-sm join-item btn-active">°C</button>
+                <button id="unit-f" class="btn btn-sm join-item">°F</button>
+              </div>
+              <button id="refresh-btn" class="btn btn-sm btn-neutral">🔄 Refresh</button>
+              <p id="last-updated" class="text-xs opacity-80">Last updated: -</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            <div class="rounded-box p-4" style="background: rgba(255,255,255,0.2);">
+              <p class="text-xs uppercase opacity-80">Feels like</p>
+              <p id="stat-feels" class="text-xl font-semibold">--°</p>
+            </div>
+            <div class="rounded-box p-4" style="background: rgba(255,255,255,0.2);">
+              <p class="text-xs uppercase opacity-80">Wind speed</p>
+              <p id="stat-wind" class="text-xl font-semibold">--</p>
+            </div>
+            <div class="rounded-box p-4" style="background: rgba(255,255,255,0.2);">
+              <p class="text-xs uppercase opacity-80">Chance of rain</p>
+              <p id="stat-rain" class="text-xl font-semibold">--%</p>
+            </div>
+            <div class="rounded-box p-4" style="background: rgba(255,255,255,0.2);">
+              <p class="text-xs uppercase opacity-80">Humidity</p>
+              <p id="stat-humidity" class="text-xl font-semibold">--%</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="text-xl font-semibold mb-3">⏪ Previous 24 hours</h3>
+        <div id="past-list" class="flex gap-3 overflow-x-auto pb-3"></div>
+      </section>
+
+      <section>
+        <h3 class="text-xl font-semibold mb-3">⏩ Next 24 hours</h3>
+        <div id="future-list" class="flex gap-3 overflow-x-auto pb-3"></div>
+      </section>
+    </div>
+  </main>
+
+  <template id="hour-card-template">
+    <div class="card bg-base-100 shadow shrink-0" style="min-width: 110px;">
+      <div class="card-body items-center text-center p-4 gap-1">
+        <p class="hour-time text-sm font-medium opacity-70">--:--</p>
+        <span class="hour-icon text-3xl">☁️</span>
+        <p class="hour-temp text-lg font-semibold">--°</p>
+        <p class="hour-rain text-xs text-info">💧 --%</p>
+        <p class="hour-wind text-xs opacity-60">--</p>
+      </div>
+    </div>
+  </template>
+
+  <footer class="footer footer-center p-6 opacity-60 text-sm">
+    <p>Weather data by Visual Crossing · Built by Sohrab</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
